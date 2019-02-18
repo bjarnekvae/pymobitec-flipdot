@@ -1,6 +1,7 @@
 from pylibftdi import Device
 import time
 import numpy as np
+import datetime
 
 def get_header():
     header = bytearray()
@@ -59,19 +60,9 @@ def set_pixels(pixels):
         for horisontal in range(28):
             bit_array = pix_map[horisontal, line-5:line]
 
-            #print(bit_array)
-
             val = sum(bit_array[i] << i for i in range(len(bit_array)))
             val = val | 0x20
-            #print(val)
             msg.append(val)
-
-
-
-    # Pixel value, 0x20 in all off, 0x3f is all on
-    #val = 0x20
-    #msg.append(val)
-    #print(bin(val))
 
     msg = add_trailer(msg)
 
@@ -83,15 +74,15 @@ def write(text):
 
     # Horizontal offset:
     msg.append(0xd2)
-    msg.append(1)
+    msg.append(3)
 
     # Vertical offset:
     msg.append(0xd3)
-    msg.append(6)
+    msg.append(11)
 
     # Font
     msg.append(0xd4)
-    msg.append(0x75)
+    msg.append(0x75) #0x75  #0x65 0x66
 
     msg.extend(text.encode('utf-8'))
 
@@ -103,16 +94,9 @@ def write(text):
 with Device(mode='b') as dev:
     dev.baudrate = 4800
 
-    seq = tuple([[0,1,2,3,4,5,6,7,8,9], [0,1,2,3,4,5,6,7,8,9]])
-
-    for y in range(16):
-        for x in range(28):
-            msg = set_pixels(tuple([x, y]))
-            dev.write(msg)
-    quit()
-
-    time.sleep(1)
-
-    msg = write("HEI")
-    dev.write(msg)
-
+    while True:
+        time_now = datetime.datetime.now()
+        time_str = time_now.strftime("%H:%M")
+        msg = write(time_str)
+        dev.write(msg)
+        time.sleep(10)
