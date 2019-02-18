@@ -1,7 +1,4 @@
-from pylibftdi import Device
-import time
 import numpy as np
-import datetime
 
 
 def get_header():
@@ -17,6 +14,7 @@ def get_header():
     header.append(16)
 
     return header
+
 
 def add_trailer(msg):
     check_sum = 0
@@ -34,8 +32,8 @@ def add_trailer(msg):
         msg.append(check_sum)
 
     msg.append(0xff)
-
     return msg
+
 
 def clear_display():
     pix_map = np.zeros([28, 20], dtype=np.bool)
@@ -66,6 +64,7 @@ def clear_display():
 
     msg = add_trailer(msg)
     return msg
+
 
 def set_pixels(pixels):
     pix_map = np.zeros([28, 20], dtype=np.bool)
@@ -110,7 +109,7 @@ def set_pixels(pixels):
 set_pixels.display_state = np.zeros([28, 20], dtype=np.bool)
 
 
-def write(text):
+def text(text_str):
     msg = get_header()
 
     # Horizontal offset:
@@ -125,18 +124,8 @@ def write(text):
     msg.append(0xd4)
     msg.append(0x75) #0x75  #0x65 0x66
 
-    msg.extend(text.encode('utf-8'))
+    msg.extend(text_str.encode('utf-8'))
 
     msg = add_trailer(msg)
     return msg
 
-
-with Device(mode='b') as dev:
-    dev.baudrate = 4800
-
-    while True:
-        time_now = datetime.datetime.now()
-        time_str = time_now.strftime("%H:%M")
-        msg = write(time_str)
-        dev.write(msg)
-        time.sleep(10)
