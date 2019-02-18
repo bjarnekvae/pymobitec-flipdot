@@ -1,6 +1,7 @@
 from pylibftdi import Device
 import time
 import numpy as np
+import datetime
 
 
 def get_header():
@@ -114,15 +115,15 @@ def write(text):
 
     # Horizontal offset:
     msg.append(0xd2)
-    msg.append(1)
+    msg.append(3)
 
     # Vertical offset:
     msg.append(0xd3)
-    msg.append(6)
+    msg.append(11)
 
     # Font
     msg.append(0xd4)
-    msg.append(0x75)
+    msg.append(0x75) #0x75  #0x65 0x66
 
     msg.extend(text.encode('utf-8'))
 
@@ -133,35 +134,9 @@ def write(text):
 with Device(mode='b') as dev:
     dev.baudrate = 4800
 
-    msg = write("HELLO")
-    dev.write(msg)
-    time.sleep(1)
-
-
-    rand_x = np.array([], dtype=np.uint8)
-    rand_y = np.array([], dtype=np.uint8)
-
     while True:
-        rand_x = np.append(rand_x, np.random.randint(0, 28))
-        rand_y = np.append(rand_y, np.random.randint(0, 16))
-
-        pixel_list = tuple([rand_x, rand_y])
-        msg = set_pixels(pixel_list)
-        print(msg)
+        time_now = datetime.datetime.now()
+        time_str = time_now.strftime("%H:%M")
+        msg = write(time_str)
         dev.write(msg)
-        time.sleep(0.1)
-
-    quit()
-
-    for y in range(16):
-        for x in range(28):
-            msg = set_pixels(tuple([x, y]))
-            print(msg)
-            dev.write(msg)
-            time.sleep(0.1)
-
-    quit()
-
-    msg = write("HEI")
-    dev.write(msg)
-
+        time.sleep(10)
