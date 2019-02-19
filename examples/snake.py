@@ -1,4 +1,4 @@
-from pylibftdi import Device
+import serial
 import time
 import pymobitec_flipdot as flipdot
 import threading
@@ -43,12 +43,11 @@ def keyboar_input(q):
             pass
 
 def update_display(q):
-    with Device(mode='b') as dev:
-        dev.baudrate = 4800
+    with serial.Serial('/dev/ttyS0', 4800, timeout=1) as ser:
 
         while True:
             command = q.get()
-            dev.write(command)
+            ser.write(command)
             #time.sleep(0.05)
 
 display_queue = queue.Queue(1)
