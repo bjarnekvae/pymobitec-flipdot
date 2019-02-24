@@ -59,6 +59,7 @@ display_thr.start()
 snake = [[3, 8], [4, 8], [5, 8]]
 snake_direction = "right"
 food = [[random.randint(0, 27), random.randint(0, 15)]]
+score = 0
 
 keybaord_queue = queue.Queue(1)
 screen = curses.initscr()
@@ -101,6 +102,9 @@ while True:
     #  Check if game over
     for i in range(len(snake)-2):
         if snake[-1][:] == snake[i+1][:]:
+            msg = flipdot.text(str(score))
+            display_queue.put(msg)
+            time.sleep(5)
             signal_handler()
 
     #  If snake goes to the end, start on the other side
@@ -116,6 +120,7 @@ while True:
     #  If snake eats food, grow by one
     if snake[-1][:] == food[0][:]:
         food = [[random.randint(0, 27), random.randint(0, 15)]]
+        score = score + 1
     else:
         snake.pop(0)
 
