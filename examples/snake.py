@@ -8,15 +8,17 @@ import signal
 import sys
 from numpy import random
 
-def signal_handler():
-        curses.nocbreak()
-        screen.keypad(0)
-        curses.echo()
-        curses.endwin()
-        print('You pressed Ctrl+C!')
-        sys.exit(0)
+
+def signal_handler(sig, frame):
+    exit_game()
 signal.signal(signal.SIGINT, signal_handler)
 
+def exit_game():
+    curses.nocbreak()
+    screen.keypad(0)
+    curses.echo()
+    curses.endwin()
+    sys.exit(0)
 
 def keyboar_input(q):
     # get the curses screen window
@@ -56,24 +58,24 @@ display_thr = threading.Thread(target=update_display, args=(display_queue,))
 display_thr.daemon = True
 display_thr.start()
 
-snake = [[3, 8], [4, 8], [5, 8]]
+init_snake = [[3, 8], [4, 8], [5, 8]]
+snake = init_snake.copy()
 snake_direction = "right"
 food = [[random.randint(0, 27), random.randint(0, 15)]]
 score = 0
 
-keybaord_queue = queue.Queue(1)
+keybaord_queue = queue.Queue(2)
 screen = curses.initscr()
 keyboard_thr = threading.Thread(target=keyboar_input, args=(keybaord_queue,))
 keyboard_thr.daemon = True
 keyboard_thr.start()
-
 
 while True:
     pixels = snake.copy()
     pixels.extend(food)
     to_display = flipdot.set_pixels(tuple(zip(*pixels)))
     display_queue.put(to_display)
-    time.sleep(0.2)
+    time.sleep(0.25)
 
     #  Set snake direction
     if keybaord_queue.qsize() > 0:
@@ -102,10 +104,28 @@ while True:
     #  Check if game over
     for i in range(len(snake)-2):
         if snake[-1][:] == snake[i+1][:]:
-            msg = flipdot.text(str(score), 8, 11, flipdot.Fonts.text_9px_bold)
+            while not keybaord_queue.empty():
+                keybaord_queue.get_nowait()
+
+            score_text = flipdot.Text("SCORE:", 2, 0, flipdot.Fonts.text_5px)
+            if score < 10:
+                score_number = flipdot.Text(str(score), 10, 15, flipdot.Fonts.text_9px_bold)
+            else:
+                score_number = flipdot.Text(str(score), 7, 15, flipdot.Fonts.text_9px_bold)
+            msg = flipdot.set_texts([score_text, score_number])
             display_queue.put(msg)
             time.sleep(5)
-            signal_handler()
+            keybaord_queue.get()
+
+            snake = init_snake.copy()
+            score = 0
+            food = [[5, 8]]
+            snake_direction = "right"
+
+            while not keybaord_queue.empty():
+                keybaord_queue.get_nowait()
+
+            break
 
     #  If snake goes to the end, start on the other side
     if snake[-1][0] == 28:

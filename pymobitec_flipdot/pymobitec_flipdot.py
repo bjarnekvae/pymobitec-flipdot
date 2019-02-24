@@ -20,6 +20,13 @@ class Fonts:
     symbols = 0x67
     bitwise = 0x77
 
+class Text:
+    def __init__(self, text, horizontal=0, vertical=0, font=Fonts.text_5px):
+        self.text = text
+        self.horizontal = horizontal
+        self.vertical = vertical
+        self.font = font
+
 def get_header():
     header = bytearray()
     header.append(0xff)  # Header
@@ -128,7 +135,7 @@ def set_pixels(pixels):
 set_pixels.display_state = np.zeros([28, 20], dtype=np.bool)
 
 
-def text(text_str, horizontal_offset, vertical_offset, font):
+def set_text(text_str, horizontal_offset, vertical_offset, font):
     msg = get_header()
 
     # Horizontal offset:
@@ -144,6 +151,29 @@ def text(text_str, horizontal_offset, vertical_offset, font):
     msg.append(font)
 
     msg.extend(text_str.encode('utf-8'))
+
+    msg = add_trailer(msg)
+    return msg
+
+def set_texts(text_list):
+    msg = get_header()
+
+    while len(text_list) > 0:
+        text_object = text_list.pop(0)
+
+        # Horizontal offset:
+        msg.append(0xd2)
+        msg.append(text_object.horizontal)
+
+        # Vertical offset:
+        msg.append(0xd3)
+        msg.append(text_object.vertical)
+
+        # Font3
+        msg.append(0xd4)
+        msg.append(text_object.font)
+
+        msg.extend(text_object.text.encode('utf-8'))
 
     msg = add_trailer(msg)
     return msg
