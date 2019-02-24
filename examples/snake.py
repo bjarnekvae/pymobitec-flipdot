@@ -48,7 +48,7 @@ def update_display(q):
         while True:
             command = q.get()
             ser.write(command)
-            #time.sleep(0.05)
+
 
 display_queue = queue.Queue(1)
 
@@ -102,7 +102,7 @@ while True:
     #  Check if game over
     for i in range(len(snake)-2):
         if snake[-1][:] == snake[i+1][:]:
-            msg = flipdot.text(str(score))
+            msg = flipdot.text(str(score), 8, 11, flipdot.Fonts.text_9px_bold)
             display_queue.put(msg)
             time.sleep(5)
             signal_handler()
