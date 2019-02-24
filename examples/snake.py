@@ -6,6 +6,7 @@ import queue
 import curses
 import signal
 import sys
+import RPi.GPIO as GPIO
 from numpy import random
 
 
@@ -46,23 +47,33 @@ def keyboar_input(q):
 
 def update_display(q):
     with serial.Serial('/dev/ttyS0', 4800, timeout=1) as ser:
-
         while True:
             command = q.get()
             ser.write(command)
 
+def set_LED(q):
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(18, GPIO.OUT)
+    GPIO.output(18, GPIO.LOW)
 
-display_queue = queue.Queue(1)
+    while(1):
+        q.get()
+        GPIO.output(18, GPIO.HIGH)
+        time.sleep(0.05)
+        GPIO.output(18, GPIO.LOW)
+        time.sleep(0.05)
 
+
+display_queue = queue.Queue(50)
 display_thr = threading.Thread(target=update_display, args=(display_queue,))
 display_thr.daemon = True
 display_thr.start()
 
-init_snake = [[3, 8], [4, 8], [5, 8]]
-snake = init_snake.copy()
-snake_direction = "right"
-food = [[random.randint(0, 27), random.randint(0, 15)]]
-score = 0
+led_queue = queue.Queue(1)
+led_thr = threading.Thread(target=set_LED, args=(led_queue,))
+led_thr.daemon = True
+led_thr.start()
 
 keybaord_queue = queue.Queue(2)
 screen = curses.initscr()
@@ -70,12 +81,18 @@ keyboard_thr = threading.Thread(target=keyboar_input, args=(keybaord_queue,))
 keyboard_thr.daemon = True
 keyboard_thr.start()
 
+init_snake = [[3, 8], [4, 8], [5, 8]]
+snake = init_snake.copy()
+snake_direction = "right"
+food = [[random.randint(0, 27), random.randint(0, 15)]]
+score = 0
+
 while True:
     pixels = snake.copy()
     pixels.extend(food)
     to_display = flipdot.set_pixels(tuple(zip(*pixels)))
     display_queue.put(to_display)
-    time.sleep(0.25)
+    time.sleep(0.2)
 
     #  Set snake direction
     if keybaord_queue.qsize() > 0:
@@ -114,6 +131,11 @@ while True:
                 score_number = flipdot.Text(str(score), 7, 15, flipdot.Fonts.text_9px_bold)
             msg = flipdot.set_texts([score_text, score_number])
             display_queue.put(msg)
+
+            time.sleep(0.3)
+            for _ in range(0, 40):
+                led_queue.put(1)
+
             time.sleep(5)
             keybaord_queue.get()
 
