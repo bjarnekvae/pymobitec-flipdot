@@ -1,6 +1,25 @@
 import numpy as np
 
 
+class Fonts:
+    text_5px = 0x72  # Large letters only
+    text_6px = 0x66
+    text_7px = 0x65
+    text_7px_bold = 0x64
+    text_9px = 0x75
+    text_9px_bold = 0x70
+    text_9px_bolder = 0x62
+    text_13px = 0x73
+    text_13px_bold = 0x69
+    text_13px_bolder = 0x61
+    text_13px_boldest = 0x79
+    text_15px = 0x71
+    text_16px = 0x68
+    text_16px_bold = 0x78
+    text_16px_bolder = 0x74
+    symbols = 0x67
+    bitwise = 0x77
+
 def get_header():
     header = bytearray()
     header.append(0xff)  # Header
@@ -109,20 +128,20 @@ def set_pixels(pixels):
 set_pixels.display_state = np.zeros([28, 20], dtype=np.bool)
 
 
-def text(text_str):
+def text(text_str, horizontal_offset, vertical_offset, font):
     msg = get_header()
 
     # Horizontal offset:
     msg.append(0xd2)
-    msg.append(3)
+    msg.append(horizontal_offset)
 
     # Vertical offset:
     msg.append(0xd3)
-    msg.append(11)
+    msg.append(vertical_offset)
 
-    # Font
+    # Font3
     msg.append(0xd4)
-    msg.append(0x75) #0x75  #0x65 0x66
+    msg.append(font)
 
     msg.extend(text_str.encode('utf-8'))
 
