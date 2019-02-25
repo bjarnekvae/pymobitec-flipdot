@@ -92,7 +92,7 @@ while True:
     pixels.extend(food)
     to_display = flipdot.set_pixels(tuple(zip(*pixels)))
     display_queue.put(to_display)
-    time.sleep(0.2)
+    time.sleep(0.25)
 
     #  Set snake direction
     if keybaord_queue.qsize() > 0:
