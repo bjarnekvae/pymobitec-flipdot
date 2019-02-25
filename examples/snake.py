@@ -65,12 +65,12 @@ def set_LED(q):
         time.sleep(0.05)
 
 
-display_queue = queue.Queue(50)
+display_queue = queue.Queue(1)
 display_thr = threading.Thread(target=update_display, args=(display_queue,))
 display_thr.daemon = True
 display_thr.start()
 
-led_queue = queue.Queue(1)
+led_queue = queue.Queue(50)
 led_thr = threading.Thread(target=set_LED, args=(led_queue,))
 led_thr.daemon = True
 led_thr.start()
@@ -121,9 +121,8 @@ while True:
     #  Check if game over
     for i in range(len(snake)-2):
         if snake[-1][:] == snake[i+1][:]:
-            while not keybaord_queue.empty():
-                keybaord_queue.get_nowait()
 
+            # Set score
             score_text = flipdot.Text("SCORE:", 2, 0, flipdot.Fonts.text_5px)
             if score < 10:
                 score_number = flipdot.Text(str(score), 10, 15, flipdot.Fonts.text_9px_bold)
@@ -132,18 +131,25 @@ while True:
             msg = flipdot.set_texts([score_text, score_number])
             display_queue.put(msg)
 
+            # blink LEDs
             time.sleep(0.3)
             for _ in range(0, 40):
                 led_queue.put(1)
+            time.sleep(4)
 
-            time.sleep(5)
-            keybaord_queue.get()
+            while not keybaord_queue.empty():
+                keybaord_queue.get_nowait()
 
+            # Re-init game
             snake = init_snake.copy()
-            score = 0
+            score = -1
             food = [[5, 8]]
             snake_direction = "right"
 
+            # Wait for key to start game
+            keybaord_queue.get()
+
+            # clear queue so new game does not start automatically
             while not keybaord_queue.empty():
                 keybaord_queue.get_nowait()
 
@@ -163,6 +169,7 @@ while True:
     if snake[-1][:] == food[0][:]:
         food = [[random.randint(0, 27), random.randint(0, 15)]]
         score = score + 1
+        led_queue.put(1)
     else:
         snake.pop(0)
 
