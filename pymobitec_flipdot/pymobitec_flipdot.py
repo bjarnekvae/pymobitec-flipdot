@@ -92,14 +92,13 @@ def clear_display():
     return msg
 
 
-def set_pixels(pixels):
+def _set_pixels(msg, pixels):
     pix_map = np.zeros([28, 20], dtype=np.bool)
     pix_map[pixels] = True
 
-    mask = np.bitwise_or(pix_map, set_pixels.display_state)
-    set_pixels.display_state = pix_map.copy()
+    mask = np.bitwise_or(pix_map, _set_pixels.display_state)
+    _set_pixels.display_state = pix_map.copy()
 
-    msg = get_header()
     lines = [5, 10, 15, 20]
     for line in lines:
         # Vertical offset:
@@ -128,16 +127,13 @@ def set_pixels(pixels):
             else:
                 horisontal_skip = True
 
-    msg = add_trailer(msg)
     return msg
 
 
-set_pixels.display_state = np.zeros([28, 20], dtype=np.bool)
+_set_pixels.display_state = np.zeros([28, 20], dtype=np.bool)
 
 
-def set_text(text_str, horizontal_offset, vertical_offset, font):
-    msg = get_header()
-
+def _set_text(msg, text_str, horizontal_offset, vertical_offset, font):
     # Horizontal offset:
     msg.append(0xd2)
     msg.append(horizontal_offset)
@@ -146,14 +142,41 @@ def set_text(text_str, horizontal_offset, vertical_offset, font):
     msg.append(0xd3)
     msg.append(vertical_offset)
 
-    # Font3
+    # Font
     msg.append(0xd4)
     msg.append(font)
 
     msg.extend(text_str.encode('utf-8'))
+    return msg
+
+
+def set_text_and_pixels(text_str, horizontal_offset, vertical_offset, font, pixels):
+    msg = get_header()
+
+    msg = _set_pixels(msg, pixels)
+    msg = _set_text(msg, text_str, horizontal_offset, vertical_offset, font)
 
     msg = add_trailer(msg)
     return msg
+
+
+def set_pixels(pixels):
+    msg = get_header()
+
+    msg = _set_pixels(msg, pixels)
+
+    msg = add_trailer(msg)
+    return msg
+
+
+def set_text(text_str, horizontal_offset, vertical_offset, font):
+    msg = get_header()
+
+    msg = _set_text(msg, text_str, horizontal_offset, vertical_offset, font)
+
+    msg = add_trailer(msg)
+    return msg
+
 
 def set_texts(text_list):
     msg = get_header()
