@@ -14,13 +14,9 @@ numbers = {
         1, 2, 13, 14,
         1, 2, 13, 14,
         2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]],
-    1: [[0, 0,
-        1, 1,
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-       [3, 4,
-        3, 4,
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    1: [[1,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2,
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]],
     2: [[0, 0, 0, 0, 0, 0, 0,
         1, 1, 1, 1, 1, 1, 1,
@@ -108,10 +104,34 @@ numbers = {
           4, 5, 10, 11]]
 }
 
+def get_pixels(hours, minutes):
+    msb_h = numbers[hours // 10].copy()
+    lsb_h = numbers[hours % 10].copy()
+    colon = numbers[10].copy()
+    msb_m = numbers[minutes // 10].copy()
+    lsb_m = numbers[minutes % 10].copy()
+
+    msb_h_x = [[x + 1 for x in msb_h[:][0]]]
+    lsb_h_x = [[x + 7 for x in lsb_h[:][0]]]
+    colon_x = [[x + 13 for x in colon[:][0]]]
+    msb_m_x = [[x + 16 for x in msb_m[:][0]]]
+    lsb_m_x = [[x + 22 for x in lsb_m[:][0]]]
+
+    pixels = [[msb_h_x[:][0] + lsb_h_x[:][0] + colon_x[:][0] + msb_m_x[:][0] + lsb_m_x[:][0]],
+              [msb_h[:][1] + lsb_h[:][1] + colon[:][1] + msb_m[:][1] + lsb_m[:][1]]]
+
+    return pixels
+
 with serial.Serial('/dev/ttyS0', 4800, timeout=1) as ser:
 
-    #while True:
-    test = numbers[0].copy()
+    while True:
+        tod = datetime.datetime.now()
 
-    msg = flipdot.set_pixels(test)
-    ser.write(msg)
+        hour = tod.hour
+        minute = tod.minute
+        pixels = get_pixels(hour, minute)
+
+        msg = flipdot.set_pixels(pixels)
+        ser.write(msg)
+
+        time.sleep(10)
