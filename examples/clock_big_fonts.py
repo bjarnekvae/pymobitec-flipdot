@@ -119,6 +119,7 @@ def get_pixels(hours, minutes):
 
     pixels = [[msb_h_x[:][0] + lsb_h_x[:][0] + colon_x[:][0] + msb_m_x[:][0] + lsb_m_x[:][0]],
               [msb_h[:][1] + lsb_h[:][1] + colon[:][1] + msb_m[:][1] + lsb_m[:][1]]]
+    pixels = tuple(pixels)
 
     return pixels
 
