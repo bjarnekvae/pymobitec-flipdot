@@ -13,7 +13,7 @@ with serial.Serial('/dev/ttyS0', 4800, timeout=1) as ser:
 
         msb_h = str(hour // 10)
         lsb_h = str(hour % 10)
-        colon = "."
+        colon = ":"
         msb_m = str(minute // 10)
         lsb_m = str(minute % 10)
 
