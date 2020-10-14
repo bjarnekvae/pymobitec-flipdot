@@ -9,7 +9,7 @@ with serial.Serial('/dev/ttyS0', 4800, timeout=1) as ser:
 
     while True:
         price = cryptocompare.get_price(currency, curr='USD')
-        price = price[currency]['USD']
+        price = price[currency]['USD'] + 0.00001 # Prevent round number
 
         if price > 1.0:
             price_str = str(price)[:5]
