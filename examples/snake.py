@@ -31,16 +31,12 @@ def keyboar_input(q):
         char = screen.getch()
         try:
             if char == curses.KEY_RIGHT:
-                screen.addstr(0, 0, 'right')
                 q.put_nowait("right")
             elif char == curses.KEY_LEFT:
-                screen.addstr(0, 0, 'left ')
                 q.put_nowait("left")
             elif char == curses.KEY_UP:
-                screen.addstr(0, 0, 'up   ')
                 q.put_nowait("up")
             elif char == curses.KEY_DOWN:
-                screen.addstr(0, 0, 'down ')
                 q.put_nowait("down")
         except queue.Full:
             pass
