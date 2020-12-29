@@ -2,3 +2,4 @@ numpy
 pylibftdi
 pyserial
 RPi.GPIO
+cryptocompare
