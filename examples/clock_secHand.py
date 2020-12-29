@@ -9,7 +9,7 @@ clock_face = [[0, 1], [0, 0], [1, 0], [7, 0], [13, 0], [14, 0], [20, 0], [26, 0]
               [27, 1], [27, 7], [27, 8], [27, 14], [0, 7], [0, 8]]
 
 
-seconds = {
+second_hand = {
     0: [[15, 0]],
     1: [[16, 0]],
     2: [[17, 0]],
@@ -89,14 +89,11 @@ with serial.Serial('/dev/ttyS0', 4800, timeout=1) as ser:
         currentTime = datetime.datetime.now()
 
         test = clock_face.copy()
-        test.extend(seconds[currentTime.second])
+        test.extend(second_hand[currentTime.second])
 
         time_now = datetime.datetime.now()
         time_str = time_now.strftime("%H:%M")
-        msg = flipdot.set_text_and_pixels(time_str,
-                                          4, 12,
-                                          flipdot.Fonts.text_9px,
-                                          tuple(zip(*test)))
+        msg = flipdot.set_text_and_pixels(time_str, 4, 12, flipdot.Fonts.text_9px, tuple(zip(*test)))
         ser.write(msg)
-        time.sleep(1)
+        time.sleep(0.9)
 
