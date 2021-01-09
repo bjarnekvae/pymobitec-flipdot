@@ -2,8 +2,7 @@ from setuptools import setup
 
 setup(name='pymobitec-flipdot',
       version='v0.1',
-      author='Bjarne Kvaestad',
-      author_email='bjarnekvae@gmail.com',
+      author='Bjarne',
       url='https://github.com/bjarnekvae/pymobitec-flipdot',
       description='Code for controlling Mobitec RS485 flip dot display',
       packages=["pymobitec_flipdot"],
